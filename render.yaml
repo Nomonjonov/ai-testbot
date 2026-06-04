@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: ai-test-bot
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python bot.py
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.7"
+      - key: BOT_TOKEN
+        sync: false          # Render dashboard'da qo'lda kiritiladi
+      - key: GEMINI_API_KEY
+        sync: false          # Render dashboard'da qo'lda kiritiladi
+      # WEBHOOK_URL ni qo'lda kiritish SHART EMAS:
+      # Render avtomatik RENDER_EXTERNAL_URL beradi va bot uni o'qiydi.
