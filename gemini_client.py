@@ -47,6 +47,45 @@ class _Question(BaseModel):
     explanation: str
 
 
+async def check_connection() -> bool:
+    """
+    Bot ishga tushganda Gemini'ga ulanishni tekshiradi.
+
+    Loglarda aniq yozadi: kalit bormi, ulanish ishladimi, qaysi model.
+    Bu funksiya botni to'xtatmaydi — faqat ogohlantiradi.
+    """
+    if not config.GEMINI_API_KEY:
+        logger.error("❌ GEMINI_API_KEY berilmagan! Hosting Environment Variables'ni tekshiring.")
+        return False
+
+    masked = config.GEMINI_API_KEY[:6] + "..." + config.GEMINI_API_KEY[-4:]
+    logger.info("Gemini kaliti topildi (%s). Ulanish tekshirilmoqda...", masked)
+
+    if not config.GEMINI_API_KEY.startswith("AIza"):
+        logger.warning(
+            "⚠️ Gemini kaliti 'AIza' bilan boshlanmayapti — bu noto'g'ri kalit bo'lishi mumkin! "
+            "To'g'ri kalitni https://aistudio.google.com/apikey dan oling."
+        )
+
+    try:
+        client = _get_client()
+        resp = await client.aio.models.generate_content(
+            model=config.GEMINI_MODEL,
+            contents="Reply with the single word: OK",
+        )
+        reply = (resp.text or "").strip()
+        logger.info("✅ Gemini ulandi! Model: %s | Sinov javobi: %r", config.GEMINI_MODEL, reply[:40])
+        return True
+    except Exception as e:  # noqa: BLE001
+        logger.error("❌ Gemini'ga ulanib bo'lmadi: %s: %s", type(e).__name__, e)
+        logger.error(
+            "Sabablari: (1) kalit noto'g'ri, (2) model nomi xato (%s), "
+            "(3) bepul limit tugagan. Kalitni tekshiring.",
+            config.GEMINI_MODEL,
+        )
+        return False
+
+
 def _is_english(subject_key: str) -> bool:
     return subject_key == "ingliz"
 

@@ -23,6 +23,7 @@ from telegram.ext import (
 
 import config
 import database as db
+import gemini_client as ai
 import handlers as h
 
 logging.basicConfig(
@@ -38,6 +39,8 @@ logger = logging.getLogger(__name__)
 async def _post_init(app: Application) -> None:
     """Bot ishga tushgandan keyin: bazani tayyorlash va buyruqlarni o'rnatish."""
     await db.init_db()
+    # Gemini'ga ulanishni tekshirish (loglarda aniq ko'rinadi)
+    await ai.check_connection()
     await app.bot.set_my_commands(
         [
             BotCommand("start", "Restart / Asosiy menyu / Главное меню / Main menu"),
